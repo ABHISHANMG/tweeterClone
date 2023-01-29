@@ -31,7 +31,7 @@ initializeDatabase();
 app.post("/register", async (request, response) => {
   const { username, password, name, gender } = request.body;
   const hashPassword = await bcrypt.hash(password, 10);
-  const registerUser = `SELECT * FROM user WHERE username = '${username};`;
+  const registerUser = `SELECT * FROM user WHERE username = '${username}';`;
   const dbUser = await db.get(registerUser);
 
   if (dbUser === undefined) {
@@ -40,8 +40,8 @@ app.post("/register", async (request, response) => {
       response.send("Password is too short");
     } else {
       const createUser = `INSERT INTO user (username,password,name,gender) VALUES 
-        ('${username}','${hashPassword},'${name}','${gender}'`;
-      const dbResponse = await db.run(createUser);
+        ('${username}','${hashPassword}','${name}','${gender}');`;
+      await db.run(createUser);
       response.status(200);
       response.send("User created successfully");
     }
@@ -96,15 +96,20 @@ app.post("/login/", async (request, response) => {
   }
 });
 
-//API 3 
+//API 3
 
-app.get('/user/tweets/feed/',authentication,async(request,response)=>{
-    const {offset = 2, limit = 5,order = "ASC",order_by = "",search_q = "",
+app.get("/user/tweets/feed/", async (request, response) => {
+  const {
+    offset = 0,
+    limit = 4,
+    order = "DESC",
+    order_by = "",
+    search_q = "",
   } = request.query;
-    const tweetUser = `SELECT * FROM user INNER JOIN tweet ON user.user_id = tweet.user_id 
-    WHERE  
-    `
-})
-
+  const tweetUser = `SELECT username , tweet , dateTime FROM tweet INNER JOIN follower ON tweet.user_id = follower.follower_user_id 
+    WHERE ORDER BY '${order} LIMIT '${limit} OFFSET ${offset};`;
+  const getQuery = await db.all(tweetUser);
+  response.send(getQuery);
+});
 
 module.exports = app;
