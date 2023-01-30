@@ -99,17 +99,48 @@ app.post("/login/", async (request, response) => {
 //API 3
 
 app.get("/user/tweets/feed/", async (request, response) => {
-  const {
-    offset = 0,
+  /*const {
     limit = 4,
     order = "DESC",
-    order_by = "",
+    order_by = "username",
     search_q = "",
-  } = request.query;
-  const tweetUser = `SELECT username , tweet , dateTime FROM tweet INNER JOIN follower ON tweet.user_id = follower.follower_user_id 
-    WHERE ORDER BY '${order} LIMIT '${limit} OFFSET ${offset};`;
+  } = request.query;*/
+  //const { userId } = request.body;
+  const tweetUser = `SELECT
+    user.username, tweet.tweet, tweet.date_time AS dateTime
+  FROM
+     user
+    INNER JOIN  tweet ON tweet.user_id = user.user_id
+    
+  ORDER BY
+    tweet.date_time DESC
+  LIMIT 4;`;
   const getQuery = await db.all(tweetUser);
   response.send(getQuery);
 });
 
+//API 4
+
+app.get("/user/following/", async (request, response) => {
+  const getNames = `SELECT DISTINCT(name) FROM user INNER JOIN follower ON user.user_id = follower.follower_user_id`;
+  const followerNames = await db.all(getNames);
+  response.send(followerNames);
+});
+
+//API 5
+
+app.get("/user/followers/", async (request, response) => {
+  const getNames = `SELECT DISTINCT(name) FROM user INNER JOIN follower ON user.user_id = follower.following_user_id`;
+  const followerNames = await db.all(getNames);
+  response.send(followerNames);
+});
+
+//API 10
+
+app.post("/user/tweets/", async (request, response) => {
+  const { tweet } = request.body;
+  const newTweet = `INSERT INTO tweet (tweet) VALUES ('${tweet}');`;
+  await db.run(newTweet);
+  response.send("Created a Tweet");
+});
 module.exports = app;
