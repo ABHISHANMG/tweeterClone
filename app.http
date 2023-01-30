@@ -20,6 +20,18 @@ Content-Type: application/json
   "password":"biden@123"
 }
 
+### 
+//API 3 
+
+POST http://localhost:3000/user/tweets/
+Content-Type: application/json 
+
+{
+   "tweet": "The Mornings..."
+}
+
+
+
 
 
  
